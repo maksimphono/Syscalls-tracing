@@ -38,20 +38,20 @@ main(int argc, char *argv[])
 {
   int i;
   char *nargv[MAXARG];
-  char *help = "Usage: etrace [--trace|-t=all|SYSCALL] [--follow-forks|-f] command\n";
+  char *help = "Usage: strace [--trace|-t=all|SYSCALL] [--follow-forks|-f] command\n";
 
   if (argc < 2) {
     fprintf(2, "%s", help);
     exit(1);
   }
 
-  char trace[MAX_ARG_LEN] = "all";
+  char syscall_name[MAX_ARG_LEN] = "all";
   int follow_forks = 0;
   char buffer[MAX_ARG_LEN] = {0};
 
   for (i = 1; i < argc && i < MAXARG; i++) {
     if (parse_param(argv[i], "--trace", "-t", buffer, sizeof(buffer))) {
-      strcpy(trace, buffer);
+      strcpy(syscall_name, buffer);
     } else if (parse_param(argv[i], "--follow-forks", "-f", buffer, sizeof(buffer))) {
       follow_forks = 1;
     } else {
@@ -64,7 +64,7 @@ main(int argc, char *argv[])
     exit(1);
   }
 
-  if (etrace(trace, follow_forks) < 0) {
+  if (etrace(syscall_name, follow_forks) < 0) {
     fprintf(2, "%s: etrace failed\n", argv[0]);
     exit(1);
   }

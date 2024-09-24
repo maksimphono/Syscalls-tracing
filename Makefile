@@ -150,7 +150,7 @@ UPROGS=\
 
 ifeq ($(LAB),syscall)
 UPROGS += \
-	$U/_etrace
+	$U/_strace
 endif
 
 fs.img: mkfs/mkfs README $(UPROGS)
