@@ -12,8 +12,8 @@ To get started with Xv6, follow these steps:
 
 1. **Clone the repository:**
     ```bash
-    $ git clone git@git.nju.edu.cn:oslab/os-lab-2024fall.git
-    $ cd os-lab-2024fall
+    $ git clone git@git.nju.edu.cn/oslab/xv6-riscv.git
+    $ cd xv6-riscv
     ```
 
 2. **Run Xv6 in QEMU:**
