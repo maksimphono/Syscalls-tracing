@@ -96,7 +96,9 @@ uint64
 sys_etrace(void)
 {
   // TODO: Implement syscall etrace here
-  uint64 p;
-  argaddr(0, &p);
+  uint64 trace_mask;
+  argaddr(0, &trace_mask);
+  myproc()->is_traced = 1;
+  myproc()->trace_mask = trace_mask;
   return 987;//get_syscalls_mask((char*)p);
 }

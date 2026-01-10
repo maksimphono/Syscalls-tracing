@@ -137,8 +137,8 @@ syscall(void)
   struct proc *p = myproc();
 
   num = p->trapframe->a7;
-  if (p->is_traced == 3) {
-    printf("Syscalls are collected\n");
+  if (p->is_traced == 1) {
+    printf("Syscalls are traced: %ld\n", p->trace_mask);
   }
   if(num > 0 && num < NELEM(syscalls) && syscalls[num]) {
     // Use num to lookup the system call function for num, call it,

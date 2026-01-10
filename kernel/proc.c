@@ -125,6 +125,7 @@ found:
   p->pid = allocpid();
   p->state = USED;
 
+  p->trace_mask = 0;
   p->is_traced = 0;
 
   // Allocate a trapframe page.
@@ -298,7 +299,8 @@ fork(void)
   }
   np->sz = p->sz;
 
-  // set traced flag
+  // set traced flag same as parent
+  np->trace_mask = p->trace_mask;
   np->is_traced = p->is_traced;
 
   // copy saved user registers.
