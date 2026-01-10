@@ -43,39 +43,6 @@ strncmp(const char *p, const char *q, uint n)
   return (uchar)*p - (uchar)*q;
 }
 
-
-int get_syscall_num(char* name) {
-  const char* syscalls_names[23] = {"", "fork", "exit", "wait", "pipe", "read", "kill", "exec", "fstat", "chdir", "dup", "getpid", "sbrk", "sleep", "uptime", "open", "write", "mknod", "unlink", "link", "mkdir", "close", "etrace"};
-  uint length[23] = {0, 4, 4, 4, 4, 4, 4, 4, 5, 5, 3, 6, 4, 5, 6, 4, 5, 5, 6, 4, 5, 5, 6};
-  for (int i = 1; i < 23; i++) {
-    if (strncmp(syscalls_names[i], name, length[i]) == 0){
-      fprintf(2, "%s\n", syscalls_names[i]);
-      return i;
-    }
-  }
-  return 0;
-}
-
-uint64 get_syscalls_mask(char* syscalls) {
-  uint64 mask = 0x0;
-  int start = 0, end = 0;
-  
-  
-  // TODO: implement logic of getting syscalls mask here
-  while (1) {
-    if (syscalls[end] == ',' || syscalls[end] == '\0') {
-      //printf("%s", &syscalls[start]);
-      mask |= 1 << get_syscall_num(&syscalls[start]);
-      start = end + 1;
-      if (syscalls[end] == '\0') break;
-    }
-    end += 1;
-  }
-
-  return mask;
-}
-
-
 int
 main(int argc, char *argv[])
 {
@@ -107,11 +74,12 @@ main(int argc, char *argv[])
     exit(1);
   }
 
+  char* s = "read,open,write,fork,pipe,mkdir";
   int ret = 0;
   if (syscall_name[0]) {
-    ret = etrace(get_syscalls_mask("read,write,open,etrace,fork,pipe,mkdir"), follow_forks); //syscall_name
+    ret = etrace(s, follow_forks); //syscall_name
   } else {
-    ret = etrace(get_syscalls_mask("read,write,open,etrace,fork,pipe,mkdir"), follow_forks);
+    ret = etrace(s, follow_forks);
   }
   if (ret < 0) {
     fprintf(2, "%s: etrace failed\n", argv[0]);

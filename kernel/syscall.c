@@ -136,16 +136,18 @@ syscall(void)
   int num;
   struct proc *p = myproc();
 
+  
   num = p->trapframe->a7;
-  if (p->is_traced == 1) {
-    printf("Syscalls are traced: %ld\n", p->trace_mask);
+  if (p->is_traced == 1 && p->trace_mask & 1 << num) {
+    // TODO: parse syscall arguments and print them in correct format
+    printf("%d: %d\n", p->pid, num);
   }
   if(num > 0 && num < NELEM(syscalls) && syscalls[num]) {
     // Use num to lookup the system call function for num, call it,
     // and store its return value in p->trapframe->a0
     p->trapframe->a0 = syscalls[num]();
-    if (num == 22){
-      printf("Exiting etrace\n");
+    if (p->is_traced == 1) {
+      //printf("-> %ld\n", p->trapframe->a0);
     }
   } else {
     printf("%d %s: unknown sys call %d\n",

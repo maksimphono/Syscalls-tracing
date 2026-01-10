@@ -92,13 +92,44 @@ sys_uptime(void)
   return xticks;
 }
 
+int get_syscall_num(char* name) {
+  const char* syscalls_names[23] = {"", "fork", "exit", "wait", "pipe", "read", "kill", "exec", "fstat", "chdir", "dup", "getpid", "sbrk", "sleep", "uptime", "open", "write", "mknod", "unlink", "link", "mkdir", "close", "etrace"};
+  uint length[23] = {0, 4, 4, 4, 4, 4, 4, 4, 5, 5, 3, 6, 4, 5, 6, 4, 5, 5, 6, 4, 5, 5, 6};
+  for (int i = 1; i < 23; i++) {
+    if (strncmp(syscalls_names[i], name, length[i]) == 0){
+      //printf("%s, %d\n", syscalls_names[i], i);
+      return i;
+    }
+  }
+  return 0;
+}
+
+uint64 get_syscalls_mask(char* raw_syscalls_names) {
+  uint64 mask = 0x0;
+  int start = 0, end = 0;
+
+  while (1) {
+    if (raw_syscalls_names[end] == ',' || raw_syscalls_names[end] == '\0') {
+      //printf("%s", &raw_syscalls_names[start]);
+      mask |= 1 << get_syscall_num(&raw_syscalls_names[start]);
+      start = end + 1;
+      if (raw_syscalls_names[end] == '\0') break;
+    }
+    end += 1;
+  }
+
+  return mask;
+}
+
 uint64
 sys_etrace(void)
 {
   // TODO: Implement syscall etrace here
-  uint64 trace_mask;
-  argaddr(0, &trace_mask);
+  char raw_syscalls_names[128] = {};
+  argstr(0, raw_syscalls_names, 128);
   myproc()->is_traced = 1;
-  myproc()->trace_mask = trace_mask;
-  return 987;//get_syscalls_mask((char*)p);
+  myproc()->trace_mask = get_syscalls_mask(raw_syscalls_names);
+  //printf("Mask: %ld", myproc()->trace_mask);
+  if (myproc()->trace_mask & 0x1) return -1;
+  return 0;//get_syscalls_mask((char*)p);
 }
