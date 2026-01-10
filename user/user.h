@@ -22,7 +22,7 @@ int getpid(void);
 char* sbrk(int);
 int sleep(int);
 int uptime(void);
-int etrace(char *syscall_name, int follow_forks);
+int etrace(uint64, int follow_forks);
 
 
 // ulib.c
