@@ -96,5 +96,5 @@ uint64
 sys_etrace(void)
 {
   // TODO: Implement syscall etrace here
-  return 0;
+  return 987;
 }
