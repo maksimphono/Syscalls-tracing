@@ -106,4 +106,5 @@ struct proc {
   char name[16];               // Process name (debugging)
 
   // TODO: Add fields here if necessary
+  int is_traced;
 };

@@ -79,7 +79,14 @@ main(int argc, char *argv[])
     nargv[j-i] = argv[j];
   }
 
-  ret = exec(nargv[0], nargv);
+  if (fork() == 0) {
+    // Child process
+    int r = exec(nargv[0], nargv);
+    exit(r);
+  } else {
+    wait(&ret);
+  }
+
   if (ret < 0) {
     fprintf(2, "exec %s failed\n", nargv[0]);
     exit(ret);
