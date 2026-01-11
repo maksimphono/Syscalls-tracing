@@ -176,19 +176,17 @@ const Syscall_arg_type* get_syscall_argument_types(int syscall_num) {
     return Syscall_arg_types_LUT[syscall_num];
 }
 
-uint8 collect_syscall_arguments(char str_arguments[6][MAX_STR_P], int syscall_num, struct trapframe* trapframe) {
+uint8 collect_syscall_arguments(char str_arguments[6][MAX_ARG_LEN], int syscall_num, struct trapframe* trapframe) {
     Syscall_arg_type* types = Syscall_arg_types_LUT[syscall_num];
     uint64 raw_arguments[6] = {trapframe->a0, trapframe->a1, trapframe->a2, trapframe->a3, trapframe->a4, trapframe->a5};
     char buffer[MAX_STR_P] = {};
     const char* syscall_args_print_formats[] = {0x0, "%d", "%u", "%d", "%u", "\"%s\"", "0x%x", "0x%x"};
 
-    uint8 buf_len = 0;
     uint8 i = 0;
 
     // collect arguments in form of arrays of strings
     for (i = 0; types[i] != ___NONE_TYPE && i < 6; i++) {
         memset(buffer, '\0', MAX_STR_P);
-        buf_len = 0;
 
         switch(types[i]) {
         case INT_32_TYPE:
@@ -197,24 +195,27 @@ uint8 collect_syscall_arguments(char str_arguments[6][MAX_STR_P], int syscall_nu
         case UINT_16_TYPE:
         case ADDRESS_TYPE:
         case OTHER_TYPE:{
-            buf_len = sprintf(buffer, MAX_STR_P, (char*)(syscall_args_print_formats[types[i]]), raw_arguments[i]);
+            sprintf(str_arguments[i], MAX_STR_P, (char*)(syscall_args_print_formats[types[i]]), raw_arguments[i]);
             break;
         }
         case STRING_TYPE:{
-            argstr(i, buffer, MAX_STR_P);
-            buf_len = MAX_STR_P;
+            int len = argstr(i, buffer, MAX_ARG_LEN);
+            sprintf(str_arguments[i], MAX_STR_P, (char*)(syscall_args_print_formats[types[i]]), buffer);
+            if (len >= MAX_STR_P) {
+              printf("Len = %d", len);
+              sprintf(&str_arguments[i][MAX_STR_P], 4, "...\"");
+            }
             break;
         }
         case ___NONE_TYPE:
           break;
         }
-        memmove(str_arguments[i], buffer, buf_len * sizeof(char));
     }
 
     return i;
 }
 
-void print_traced_syscall(int pid, int syscall_num, char syscall_arguments[6][MAX_STR_P], uint8 arguments_len, uint64 ret) {
+void print_traced_syscall(int pid, int syscall_num, char syscall_arguments[6][MAX_ARG_LEN], uint8 arguments_len, uint64 ret) {
   printf("%d: syscall %s(", pid, get_syscall_name(syscall_num));
   for (uint8 i = 0; i < arguments_len - 1; i++) {
     printf("%s, ", syscall_arguments[i]);
@@ -228,7 +229,7 @@ syscall(void)
 {
   int num, pid = 0;
   struct proc *p = myproc();
-  char syscall_arguments[6][MAX_STR_P] = {{}, {}, {}, {}, {}, {}};
+  char syscall_arguments[6][MAX_ARG_LEN] = {{}, {}, {}, {}, {}, {}};
   uint8 syscall_arguments_len = 0;
 
   num = p->trapframe->a7;
