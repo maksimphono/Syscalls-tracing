@@ -221,12 +221,13 @@ void print_traced_syscall(int pid, int syscall_num, char syscall_arguments[6][MA
     printf("%s, ", syscall_arguments[i]);
   }
   printf("%s)", syscall_arguments[arguments_len - 1]);
-  if (ret == (uint64)-1) {
+  if (syscall_num == SYS_exit)
     printf(" -> ?\n");
-  } else {
-    printf(" -> %lu\n", ret);
-  }
+  else
+    printf(" -> %ld\n", (long)ret);
 }
+
+
 
 void
 syscall(void)
@@ -245,7 +246,7 @@ syscall(void)
       pid = p->pid;
       syscall_arguments_len = collect_syscall_arguments(syscall_arguments, num, p->trapframe);
       if (num == SYS_exit) {
-        print_traced_syscall(pid, num, syscall_arguments, syscall_arguments_len, (uint64)-1);
+        print_traced_syscall(pid, num, syscall_arguments, syscall_arguments_len, 0);
       }
       p->trapframe->a0 = syscalls[num]();
       print_traced_syscall(pid, num, syscall_arguments, syscall_arguments_len, p->trapframe->a0);
