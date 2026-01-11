@@ -127,6 +127,7 @@ found:
 
   p->trace_mask = 0;
   p->is_traced = 0;
+  p->trace_fork = 0;
 
   // Allocate a trapframe page.
   if((p->trapframe = (struct trapframe *)kalloc()) == 0){
@@ -300,8 +301,11 @@ fork(void)
   np->sz = p->sz;
 
   // set traced flag same as parent
-  np->trace_mask = p->trace_mask;
-  np->is_traced = p->is_traced;
+  if (p->is_traced && p->trace_fork) {
+    np->trace_mask = p->trace_mask;
+    np->is_traced = p->is_traced;
+    np->trace_fork = p->trace_fork;
+  }
 
   // copy saved user registers.
   *(np->trapframe) = *(p->trapframe);

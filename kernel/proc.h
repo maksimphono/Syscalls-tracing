@@ -108,4 +108,5 @@ struct proc {
   // TODO: Add fields here if necessary
   uint64 trace_mask;
   int is_traced;
+  int trace_fork;
 };
