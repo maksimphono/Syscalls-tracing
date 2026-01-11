@@ -202,7 +202,6 @@ uint8 collect_syscall_arguments(char str_arguments[6][MAX_ARG_LEN], int syscall_
             int len = argstr(i, buffer, MAX_ARG_LEN);
             sprintf(str_arguments[i], MAX_STR_P, (char*)(syscall_args_print_formats[types[i]]), buffer);
             if (len >= MAX_STR_P) {
-              printf("Len = %d", len);
               sprintf(&str_arguments[i][MAX_STR_P], 4, "...\"");
             }
             break;
@@ -239,6 +238,7 @@ syscall(void)
 
   num = p->trapframe->a7;
 
+  //printf("\n\n%ld\n\n", p->trace_mask);
   if(num > 0 && num < NELEM(syscalls) && syscalls[num]) {
     // Use num to lookup the system call function for num, call it,
     // and store its return value in p->trapframe->a0

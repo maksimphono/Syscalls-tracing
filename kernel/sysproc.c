@@ -130,12 +130,20 @@ sys_etrace(void)
 {
   // TODO: Implement syscall etrace here
   char raw_syscalls_names[128] = {};
-  int trace_fork = 0;
-  argstr(0, raw_syscalls_names, 128);
-  argint(1, &trace_fork);
+  int trace_fork = 0, trace_all = 0;
+  argint(0, &trace_all);
+
+  if (trace_all == 0) {
+    myproc()->trace_mask = 0xfffffffffffffffe;
+  } else {
+    argstr(0, raw_syscalls_names, MAX_STR_P);
+    myproc()->trace_mask = get_syscalls_mask(raw_syscalls_names);
+  }
+
   myproc()->is_traced = 1;
+  argint(1, &trace_fork);
   myproc()->trace_fork = trace_fork;
-  myproc()->trace_mask = get_syscalls_mask(raw_syscalls_names);
+    
   //printf("Mask: %ld", myproc()->trace_mask);
   if (myproc()->trace_mask & 0x1) return -1;
   return 0;//get_syscalls_mask((char*)p);

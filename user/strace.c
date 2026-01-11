@@ -74,12 +74,12 @@ main(int argc, char *argv[])
     exit(1);
   }
 
-  char* s = "fork";//"read,open,write,close,abs,exit,fork,pipe,mkdir,exec";
+  char* s = "exec";//"read,open,write,close,abs,exit,fork,pipe,mkdir,exec";
   int ret = 0;
   if (syscall_name[0]) {
     ret = etrace(s, follow_forks); //syscall_name
   } else {
-    ret = etrace(s, follow_forks);
+    ret = etrace(0, follow_forks);
   }
   if (ret < 0) {
     fprintf(2, "%s: etrace failed\n", argv[0]);
