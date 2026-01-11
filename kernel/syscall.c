@@ -195,14 +195,15 @@ uint8 collect_syscall_arguments(char str_arguments[6][MAX_ARG_LEN], int syscall_
         case UINT_16_TYPE:
         case ADDRESS_TYPE:
         case OTHER_TYPE:{
-            sprintf(str_arguments[i], MAX_STR_P, (char*)(syscall_args_print_formats[types[i]]), raw_arguments[i]);
+            sprintf(str_arguments[i], MAX_ARG_LEN, (char*)(syscall_args_print_formats[types[i]]), raw_arguments[i]);
             break;
         }
         case STRING_TYPE:{
             int len = argstr(i, buffer, MAX_ARG_LEN);
-            sprintf(str_arguments[i], MAX_STR_P, (char*)(syscall_args_print_formats[types[i]]), buffer);
-            if (len >= MAX_STR_P) {
-              sprintf(&str_arguments[i][MAX_STR_P], 4, "...\"");
+            //len -= 1;
+            sprintf(str_arguments[i], MAX_STR_P + 2, (char*)(syscall_args_print_formats[types[i]]), buffer);
+            if (len > MAX_STR_P) {
+              sprintf(&str_arguments[i][MAX_STR_P + 1], 4, "\"...");
             }
             break;
         }
