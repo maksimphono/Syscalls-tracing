@@ -74,7 +74,7 @@ main(int argc, char *argv[])
     exit(1);
   }
 
-  char* s = "read,open,write,close,exit,fork,pipe,mkdir,exec";
+  char* s = "asd";//"read,open,write,close,abs,exit,fork,pipe,mkdir,exec";
   int ret = 0;
   if (syscall_name[0]) {
     ret = etrace(s, follow_forks); //syscall_name

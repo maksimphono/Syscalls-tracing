@@ -107,16 +107,20 @@ int get_syscall_num(char* name) {
 uint64 get_syscalls_mask(char* raw_syscalls_names) {
   uint64 mask = 0x0;
   int start = 0, end = 0;
+  int num = 0;
 
   while (1) {
     if (raw_syscalls_names[end] == ',' || raw_syscalls_names[end] == '\0') {
       //printf("%s", &raw_syscalls_names[start]);
-      mask |= 1 << get_syscall_num(&raw_syscalls_names[start]);
+      num = get_syscall_num(&raw_syscalls_names[start]);
+      if (num != 0) {
+        mask |= 1 << num;
+      }
       start = end + 1;
       if (raw_syscalls_names[end] == '\0') break;
     }
     end += 1;
-  }
+  } 
 
   return mask;
 }
