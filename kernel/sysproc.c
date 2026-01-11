@@ -136,14 +136,14 @@ sys_etrace(void)
   if (trace_all == 0) {
     myproc()->trace_mask = 0xfffffffffffffffe;
   } else {
-    argstr(0, raw_syscalls_names, MAX_STR_P);
+    if (argstr(0, raw_syscalls_names, MAX_ARG_LEN) < 0) return -1;
     myproc()->trace_mask = get_syscalls_mask(raw_syscalls_names);
   }
 
   myproc()->is_traced = 1;
   argint(1, &trace_fork);
   myproc()->trace_fork = trace_fork;
-    
+
   //printf("Mask: %ld", myproc()->trace_mask);
   if (myproc()->trace_mask & 0x1) return -1;
   return 0;//get_syscalls_mask((char*)p);

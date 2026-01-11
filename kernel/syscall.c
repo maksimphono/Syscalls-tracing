@@ -207,8 +207,8 @@ uint8 collect_syscall_arguments(char str_arguments[6][MAX_ARG_LEN], int syscall_
             }
             break;
         }
-        case ___NONE_TYPE:
-          break;
+        default:
+          continue;
         }
     }
 
