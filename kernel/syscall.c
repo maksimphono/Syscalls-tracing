@@ -167,6 +167,11 @@ static Syscall_arg_type Syscall_arg_types_LUT[][6] = {
 [SYS_etrace]  { STRING_TYPE  , INT_32_TYPE  , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE  }
 };
 
+const char* get_syscall_name(int syscall_num) {
+    const char* names[] = {"", "fork", "exit", "wait", "pipe", "read", "kill", "exec", "fstat", "chdir", "dup", "getpid", "sbrk", "sleep", "uptime", "open", "write", "mknod", "unlink", "link", "mkdir", "close", "etrace"};
+    return names[syscall_num];
+} 
+
 const Syscall_arg_type* get_syscall_argument_types(int syscall_num) {
     return Syscall_arg_types_LUT[syscall_num];
 }
@@ -220,7 +225,7 @@ syscall(void)
     // TODO: parse syscall arguments and print them in correct format
     char arguments[6][MAX_STR_P] = {{}, {}, {}, {}, {}, {}};
     uint len = collect_syscall_arguments(arguments, num, p->trapframe);
-    printf("Syscall %d, arguments:", num);
+    printf("Proc: %d, syscall %s, arguments:", p->pid, get_syscall_name(num));
     for (uint8 i = 0; i < len; i++) {
       printf("%s, ", arguments[i]);
     }
