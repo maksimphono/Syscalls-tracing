@@ -92,11 +92,11 @@ sys_uptime(void)
   return xticks;
 }
 
-int get_syscall_num(char* name) {
-  const char* syscalls_names[23] = {"", "fork", "exit", "wait", "pipe", "read", "kill", "exec", "fstat", "chdir", "dup", "getpid", "sbrk", "sleep", "uptime", "open", "write", "mknod", "unlink", "link", "mkdir", "close", "etrace"};
-  uint length[23] = {0, 4, 4, 4, 4, 4, 4, 4, 5, 5, 3, 6, 4, 5, 6, 4, 5, 5, 6, 4, 5, 5, 6};
-  for (int i = 1; i < 23; i++) {
-    if (strncmp(syscalls_names[i], name, length[i]) == 0){
+static const char* Syscalls_names[NSYSCALLS + 1] = {"", "fork", "exit", "wait", "pipe", "read", "kill", "exec", "fstat", "chdir", "dup", "getpid", "sbrk", "sleep", "uptime", "open", "write", "mknod", "unlink", "link", "mkdir", "close", "etrace"};
+
+int get_syscall_num(char* name, uint64 len) {
+  for (int i = 1; i < NSYSCALLS + 1; i++) {
+    if (len == strlen(Syscalls_names[i]) && strncmp(Syscalls_names[i], name, len) == 0) {
       //printf("%s, %d\n", syscalls_names[i], i);
       return i;
     }
@@ -112,9 +112,9 @@ uint64 get_syscalls_mask(char* raw_syscalls_names) {
   while (1) {
     if (raw_syscalls_names[end] == ',' || raw_syscalls_names[end] == '\0') {
       //printf("%s", &raw_syscalls_names[start]);
-      num = get_syscall_num(&raw_syscalls_names[start]);
+      num = get_syscall_num(&raw_syscalls_names[start], end - start);
       if (num != 0) {
-        mask |= 1 << num;
+        mask |= 1L << num;
       }
       start = end + 1;
       if (raw_syscalls_names[end] == '\0') break;
@@ -129,12 +129,13 @@ uint64
 sys_etrace(void)
 {
   // TODO: Implement syscall etrace here
-  char raw_syscalls_names[128] = {};
-  int trace_fork = 0, trace_all = 0;
-  argint(0, &trace_all);
+  char raw_syscalls_names[MAX_ARG_LEN] = {};
+  int trace_fork = 0;
+  uint64 trace_all = 0;
+  argaddr(0, &trace_all);
 
-  if (trace_all == 0) {
-    myproc()->trace_mask = 0xfffffffffffffffe;
+  if (trace_all == 0L) {
+    myproc()->trace_mask = 0xfffffffffffffffeUL;
   } else {
     if (argstr(0, raw_syscalls_names, MAX_ARG_LEN) < 0) return -1;
     myproc()->trace_mask = get_syscalls_mask(raw_syscalls_names);

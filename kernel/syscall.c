@@ -167,9 +167,11 @@ static Syscall_arg_type Syscall_arg_types_LUT[][6] = {
 [SYS_etrace]  { STRING_TYPE  , INT_32_TYPE  , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE  }
 };
 
+static const char* Syscalls_names[NSYSCALLS + 1] = {"", "fork", "exit", "wait", "pipe", "read", "kill", "exec", "fstat", "chdir", "dup", "getpid", "sbrk", "sleep", "uptime", "open", "write", "mknod", "unlink", "link", "mkdir", "close", "etrace"};
+
 const char* get_syscall_name(int syscall_num) {
-    const char* names[] = {"", "fork", "exit", "wait", "pipe", "read", "kill", "exec", "fstat", "chdir", "dup", "getpid", "sbrk", "sleep", "uptime", "open", "write", "mknod", "unlink", "link", "mkdir", "close", "etrace"};
-    return names[syscall_num];
+    //const char* names[] = {"", "fork", "exit", "wait", "pipe", "read", "kill", "exec", "fstat", "chdir", "dup", "getpid", "sbrk", "sleep", "uptime", "open", "write", "mknod", "unlink", "link", "mkdir", "close", "etrace"};
+    return Syscalls_names[syscall_num];
 } 
 
 const Syscall_arg_type* get_syscall_argument_types(int syscall_num) {
@@ -180,7 +182,7 @@ uint8 collect_syscall_arguments(char str_arguments[6][MAX_ARG_LEN], int syscall_
     Syscall_arg_type* types = Syscall_arg_types_LUT[syscall_num];
     uint64 raw_arguments[6] = {trapframe->a0, trapframe->a1, trapframe->a2, trapframe->a3, trapframe->a4, trapframe->a5};
     char buffer[MAX_STR_P] = {};
-    const char* syscall_args_print_formats[] = {0x0, "%d", "%u", "%d", "%u", "\"%s\"", "0x%x", "0x%x"};
+    const char* syscall_args_print_formats[] = {0x0, "%d", "%u", "%d", "%u", "\"%s\"", "0x%lx", "0x%lx"};
 
     uint8 i = 0;
 
@@ -217,10 +219,13 @@ uint8 collect_syscall_arguments(char str_arguments[6][MAX_ARG_LEN], int syscall_
 
 void print_traced_syscall(int pid, int syscall_num, char syscall_arguments[6][MAX_ARG_LEN], uint8 arguments_len, uint64 ret) {
   printf("%d: syscall %s(", pid, get_syscall_name(syscall_num));
-  for (uint8 i = 0; i < arguments_len - 1; i++) {
-    printf("%s, ", syscall_arguments[i]);
+  if (arguments_len > 0) {
+    for (uint8 i = 0; i < arguments_len - 1; i++) {
+      printf("%s, ", syscall_arguments[i]);
+    }
+    printf("%s", syscall_arguments[arguments_len - 1]);
   }
-  printf("%s)", syscall_arguments[arguments_len - 1]);
+  printf(")");
   if (syscall_num == SYS_exit)
     printf(" -> ?\n");
   else
@@ -243,7 +248,7 @@ syscall(void)
   if(num > 0 && num < NELEM(syscalls) && syscalls[num]) {
     // Use num to lookup the system call function for num, call it,
     // and store its return value in p->trapframe->a0
-    if (p->is_traced == 1 && p->trace_mask & (1 << num)) {
+    if (p->is_traced == 1 && p->trace_mask & (1L << num)) {
       pid = p->pid;
       syscall_arguments_len = collect_syscall_arguments(syscall_arguments, num, p->trapframe);
       if (num == SYS_exit) {
