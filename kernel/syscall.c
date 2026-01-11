@@ -171,17 +171,60 @@ const Syscall_arg_type* get_syscall_argument_types(int syscall_num) {
     return Syscall_arg_types_LUT[syscall_num];
 }
 
+uint8 collect_syscall_arguments(char str_arguments[6][MAX_STR_P], int syscall_num, struct trapframe* trapframe) {
+    Syscall_arg_type* types = Syscall_arg_types_LUT[syscall_num];
+    uint64 raw_arguments[6] = {trapframe->a0, trapframe->a1, trapframe->a2, trapframe->a3, trapframe->a4, trapframe->a5};
+    char buffer[MAX_STR_P] = {};
+    const char* syscall_args_print_formats[] = {0x0, "%d", "%u", "%d", "%u", "\"%s\"", "0x%x", "0x%x"};
+
+    uint8 buf_len = 0;
+    uint8 i = 0;
+
+    // collect arguments in form of arrays of strings
+    for (i = 0; types[i] != ___NONE_TYPE && i < 6; i++) {
+        memset(buffer, '\0', MAX_STR_P);
+        buf_len = 0;
+
+        switch(types[i]) {
+        case INT_32_TYPE:
+        case UINT_32_TYPE:
+        case INT_16_TYPE:
+        case UINT_16_TYPE:
+        case ADDRESS_TYPE:
+        case OTHER_TYPE:{
+            buf_len = sprintf(buffer, MAX_STR_P, (char*)(syscall_args_print_formats[types[i]]), raw_arguments[i]);
+            break;
+        }
+        case STRING_TYPE:{
+            argstr(i, buffer, MAX_STR_P);
+            buf_len = MAX_STR_P;
+            break;
+        }
+        case ___NONE_TYPE:
+          break;
+        }
+        memmove(str_arguments[i], buffer, buf_len * sizeof(char));
+    }
+
+    return i;
+}
+
 void
 syscall(void)
 {
   int num;
   struct proc *p = myproc();
 
-  
   num = p->trapframe->a7;
   if (p->is_traced == 1 && p->trace_mask & (1 << num)) {
     // TODO: parse syscall arguments and print them in correct format
-    printf("Syscall %d, argument types: %d %d %d %d %d %d\n", num, Syscall_arg_types_LUT[num][0], Syscall_arg_types_LUT[num][1], Syscall_arg_types_LUT[num][2], Syscall_arg_types_LUT[num][3], Syscall_arg_types_LUT[num][4], Syscall_arg_types_LUT[num][5]);
+    char arguments[6][MAX_STR_P] = {{}, {}, {}, {}, {}, {}};
+    uint len = collect_syscall_arguments(arguments, num, p->trapframe);
+    printf("Syscall %d, arguments:", num);
+    for (uint8 i = 0; i < len; i++) {
+      printf("%s, ", arguments[i]);
+    }
+    printf("\n");
   }
   if(num > 0 && num < NELEM(syscalls) && syscalls[num]) {
     // Use num to lookup the system call function for num, call it,
