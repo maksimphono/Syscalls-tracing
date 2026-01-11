@@ -221,7 +221,11 @@ void print_traced_syscall(int pid, int syscall_num, char syscall_arguments[6][MA
     printf("%s, ", syscall_arguments[i]);
   }
   printf("%s)", syscall_arguments[arguments_len - 1]);
-  printf(" -> %lu\n", ret);
+  if (ret == (uint64)-1) {
+    printf(" -> ?\n");
+  } else {
+    printf(" -> %lu\n", ret);
+  }
 }
 
 void
@@ -233,18 +237,20 @@ syscall(void)
   uint8 syscall_arguments_len = 0;
 
   num = p->trapframe->a7;
-  if (p->is_traced == 1 && p->trace_mask & (1 << num)) {
-    // TODO: parse syscall arguments and print them in correct format
-    pid = p->pid;
-    syscall_arguments_len = collect_syscall_arguments(syscall_arguments, num, p->trapframe);
-    //printf("Proc: %d, syscall %s, arguments:", p->pid, get_syscall_name(num));
-  }
+
   if(num > 0 && num < NELEM(syscalls) && syscalls[num]) {
     // Use num to lookup the system call function for num, call it,
     // and store its return value in p->trapframe->a0
-    p->trapframe->a0 = syscalls[num]();
     if (p->is_traced == 1 && p->trace_mask & (1 << num)) {
+      pid = p->pid;
+      syscall_arguments_len = collect_syscall_arguments(syscall_arguments, num, p->trapframe);
+      if (num == SYS_exit) {
+        print_traced_syscall(pid, num, syscall_arguments, syscall_arguments_len, (uint64)-1);
+      }
+      p->trapframe->a0 = syscalls[num]();
       print_traced_syscall(pid, num, syscall_arguments, syscall_arguments_len, p->trapframe->a0);
+    } else {
+      p->trapframe->a0 = syscalls[num]();
     }
   } else {
     printf("%d %s: unknown sys call %d\n",
