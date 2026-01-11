@@ -130,6 +130,47 @@ static uint64 (*syscalls[])(void) = {
 [SYS_etrace]  sys_etrace
 };
 
+
+typedef enum {
+    ___NONE_TYPE = 0, 
+    INT_32_TYPE  = 1, 
+    UINT_32_TYPE = 2, 
+    INT_16_TYPE  = 3, 
+    UINT_16_TYPE = 4, 
+    STRING_TYPE  = 5, 
+    ADDRESS_TYPE = 6, 
+    OTHER_TYPE   = 7
+} Syscall_arg_type;
+
+static Syscall_arg_type Syscall_arg_types_LUT[][6] = {
+[SYS_fork]    { ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE  },
+[SYS_exit]    { INT_32_TYPE  , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE  },
+[SYS_wait]    { ADDRESS_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE  },
+[SYS_pipe]    { ADDRESS_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE  },
+[SYS_read]    { INT_32_TYPE  , ADDRESS_TYPE , INT_32_TYPE  , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE  },
+[SYS_kill]    { INT_32_TYPE  , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE  },
+[SYS_exec]    { STRING_TYPE  , ADDRESS_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE  },
+[SYS_fstat]   { INT_32_TYPE  , ADDRESS_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE  },
+[SYS_chdir]   { STRING_TYPE  , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE  },
+[SYS_dup]     { INT_32_TYPE  , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE  },
+[SYS_getpid]  { ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE  },
+[SYS_sbrk]    { INT_32_TYPE  , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE  },
+[SYS_sleep]   { INT_32_TYPE  , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE  },
+[SYS_uptime]  { ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE  },
+[SYS_open]    { STRING_TYPE  , INT_32_TYPE  , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE  },
+[SYS_write]   { INT_32_TYPE  , ADDRESS_TYPE , INT_32_TYPE  , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE  },
+[SYS_mknod]   { STRING_TYPE  , INT_16_TYPE  , INT_16_TYPE  , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE  },
+[SYS_unlink]  { STRING_TYPE  , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE  },
+[SYS_link]    { STRING_TYPE  , STRING_TYPE  , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE  },
+[SYS_mkdir]   { STRING_TYPE  , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE  },
+[SYS_close]   { INT_32_TYPE  , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE  },
+[SYS_etrace]  { STRING_TYPE  , INT_32_TYPE  , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE  }
+};
+
+const Syscall_arg_type* get_syscall_argument_types(int syscall_num) {
+    return Syscall_arg_types_LUT[syscall_num];
+}
+
 void
 syscall(void)
 {
@@ -138,9 +179,9 @@ syscall(void)
 
   
   num = p->trapframe->a7;
-  if (p->is_traced == 1 && p->trace_mask & 1 << num) {
+  if (p->is_traced == 1 && p->trace_mask & (1 << num)) {
     // TODO: parse syscall arguments and print them in correct format
-    printf("%d: %d\n", p->pid, num);
+    printf("Syscall %d, argument types: %d %d %d %d %d %d\n", num, Syscall_arg_types_LUT[num][0], Syscall_arg_types_LUT[num][1], Syscall_arg_types_LUT[num][2], Syscall_arg_types_LUT[num][3], Syscall_arg_types_LUT[num][4], Syscall_arg_types_LUT[num][5]);
   }
   if(num > 0 && num < NELEM(syscalls) && syscalls[num]) {
     // Use num to lookup the system call function for num, call it,
