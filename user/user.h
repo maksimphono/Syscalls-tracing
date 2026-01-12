@@ -24,7 +24,6 @@ int sleep(int);
 int uptime(void);
 int etrace(const char*, int);
 
-
 // ulib.c
 int stat(const char*, struct stat*);
 char* strcpy(char*, const char*);

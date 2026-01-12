@@ -34,16 +34,6 @@ int parse_param(const char *arg, const char *name, const char *abb, char *value,
 }
 
 int
-strncmp(const char *p, const char *q, uint n)
-{
-  while(n > 0 && *p && *p == *q)
-    n--, p++, q++;
-  if(n == 0)
-    return 0;
-  return (uchar)*p - (uchar)*q;
-}
-
-int
 main(int argc, char *argv[])
 {
   int i;
@@ -74,10 +64,9 @@ main(int argc, char *argv[])
     exit(1);
   }
 
-  //char* s = "exec";//"read,open,write,close,abs,exit,fork,pipe,mkdir,exec";
   int ret = 0;
   if (syscall_name[0]) {
-    ret = etrace(syscall_name, follow_forks); //syscall_name
+    ret = etrace(syscall_name, follow_forks);
   } else {
     ret = etrace(0, follow_forks);
   }
