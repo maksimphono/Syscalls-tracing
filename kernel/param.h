@@ -12,6 +12,7 @@
 #define FSSIZE     2000  // size of file system in blocks
 #define MAXPATH     128  // maximum file path name
 #define USERSTACK     1  // user stack pages
-#define NSYSCALLS    22  // number of system calls
+#define NSYSCALLS    23  // number of system calls
+#define SYS_MAXARG    6  // number of syscall arguments
 #define MAX_ARG_LEN 256  // maximum length of str arguments of a system call
 #define MAX_STR_P   128  // maximum length of str arguments printed when system call tracing

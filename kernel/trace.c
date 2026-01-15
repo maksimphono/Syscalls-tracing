@@ -8,7 +8,7 @@
 #include "defs.h"
 #include "trace.h"
 
-Syscall_arg_type Syscall_arg_types_LUT[][6] = {
+const Syscall_arg_type Syscall_arg_types_LUT[][SYS_MAXARG] = {
 [SYS_fork]    { ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE  },
 [SYS_exit]    { INT_32_TYPE  , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE  },
 [SYS_wait]    { ADDRESS_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE  },
@@ -33,7 +33,7 @@ Syscall_arg_type Syscall_arg_types_LUT[][6] = {
 [SYS_etrace]  { STRING_TYPE  , INT_32_TYPE  , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE  }
 };
 
-const char* Syscalls_names[NSYSCALLS + 1] = {
+const char* Syscalls_names[NSYSCALLS] = {
     "", 
     "fork", 
     "exit", 
@@ -67,9 +67,9 @@ const Syscall_arg_type* get_syscall_argument_types(int syscall_num) {
     return Syscall_arg_types_LUT[syscall_num];
 }
 
-uint8 collect_syscall_arguments(char str_arguments[6][MAX_ARG_LEN], int syscall_num, struct trapframe* trapframe) {
+uint8 collect_syscall_arguments(char str_arguments[SYS_MAXARG][MAX_ARG_LEN], int syscall_num, struct trapframe* trapframe) {
     Syscall_arg_type* types = Syscall_arg_types_LUT[syscall_num];
-    uint64 raw_arguments[6] = {trapframe->a0, trapframe->a1, trapframe->a2, trapframe->a3, trapframe->a4, trapframe->a5};
+    uint64 raw_arguments[SYS_MAXARG] = {trapframe->a0, trapframe->a1, trapframe->a2, trapframe->a3, trapframe->a4, trapframe->a5};
     char buffer[MAX_STR_P] = {};
     const char* syscall_args_print_formats[] = {0x0, "%d", "%u", "%d", "%u", "\"%s\"", "0x%lx", "0x%lx"};
 
@@ -106,7 +106,7 @@ uint8 collect_syscall_arguments(char str_arguments[6][MAX_ARG_LEN], int syscall_
     return i;
 }
 
-void print_traced_syscall(int pid, int syscall_num, char syscall_arguments[6][MAX_ARG_LEN], uint8 arguments_len, uint64 ret) {
+void print_traced_syscall(int pid, int syscall_num, char syscall_arguments[SYS_MAXARG][MAX_ARG_LEN], uint8 arguments_len, uint64 ret) {
   printf("%d: syscall %s(", pid, get_syscall_name(syscall_num));
   if (arguments_len > 0) {
     for (uint8 i = 0; i < arguments_len - 1; i++) {
