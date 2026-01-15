@@ -8,7 +8,7 @@
 #include "defs.h"
 #include "trace.h"
 
-const Syscall_arg_type Syscall_arg_types_LUT[][SYS_MAXARG] = {
+Syscall_arg_type Syscall_arg_types_LUT[][SYS_MAXARG] = {
 [SYS_fork]    { ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE  },
 [SYS_exit]    { INT_32_TYPE  , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE  },
 [SYS_wait]    { ADDRESS_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE  },
@@ -121,3 +121,33 @@ void print_traced_syscall(int pid, int syscall_num, char syscall_arguments[SYS_M
     printf(" -> %ld\n", (long)ret);
 }
 
+int get_syscall_num(char* name, uint64 len) {
+  for (int i = 1; i < NSYSCALLS + 1; i++) {
+    if (len == strlen(Syscalls_names[i]) && strncmp(Syscalls_names[i], name, len) == 0) {
+      //printf("%s, %d\n", syscalls_names[i], i);
+      return i;
+    }
+  }
+  return 0;
+}
+
+uint64 get_syscalls_mask(char* raw_syscalls_names) {
+  uint64 mask = 0x0;
+  int start = 0, end = 0;
+  int num = 0;
+
+  while (1) {
+    if (raw_syscalls_names[end] == ',' || raw_syscalls_names[end] == '\0') {
+      //printf("%s", &raw_syscalls_names[start]);
+      num = get_syscall_num(&raw_syscalls_names[start], end - start);
+      if (num != 0) {
+        mask |= 1L << num;
+      }
+      start = end + 1;
+      if (raw_syscalls_names[end] == '\0') break;
+    }
+    end += 1;
+  } 
+
+  return mask;
+}

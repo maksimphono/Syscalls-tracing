@@ -5,6 +5,7 @@
 #include "memlayout.h"
 #include "spinlock.h"
 #include "proc.h"
+#include "trace.h"
 
 uint64
 sys_exit(void)
@@ -92,38 +93,7 @@ sys_uptime(void)
   return xticks;
 }
 
-static const char* Syscalls_names[NSYSCALLS + 1] = {"", "fork", "exit", "wait", "pipe", "read", "kill", "exec", "fstat", "chdir", "dup", "getpid", "sbrk", "sleep", "uptime", "open", "write", "mknod", "unlink", "link", "mkdir", "close", "etrace"};
-
-int get_syscall_num(char* name, uint64 len) {
-  for (int i = 1; i < NSYSCALLS + 1; i++) {
-    if (len == strlen(Syscalls_names[i]) && strncmp(Syscalls_names[i], name, len) == 0) {
-      //printf("%s, %d\n", syscalls_names[i], i);
-      return i;
-    }
-  }
-  return 0;
-}
-
-uint64 get_syscalls_mask(char* raw_syscalls_names) {
-  uint64 mask = 0x0;
-  int start = 0, end = 0;
-  int num = 0;
-
-  while (1) {
-    if (raw_syscalls_names[end] == ',' || raw_syscalls_names[end] == '\0') {
-      //printf("%s", &raw_syscalls_names[start]);
-      num = get_syscall_num(&raw_syscalls_names[start], end - start);
-      if (num != 0) {
-        mask |= 1L << num;
-      }
-      start = end + 1;
-      if (raw_syscalls_names[end] == '\0') break;
-    }
-    end += 1;
-  } 
-
-  return mask;
-}
+//static const char* Syscalls_names[NSYSCALLS] = {"", "fork", "exit", "wait", "pipe", "read", "kill", "exec", "fstat", "chdir", "dup", "getpid", "sbrk", "sleep", "uptime", "open", "write", "mknod", "unlink", "link", "mkdir", "close", "etrace"};
 
 uint64
 sys_etrace(void)
