@@ -105,7 +105,7 @@ sys_etrace(void)
   argaddr(0, &trace_all);
 
   if (trace_all == 0L) {
-    myproc()->trace_mask = 0xfffffffffffffffeUL;
+    myproc()->trace_mask = TRACE_ALL_MSK;
   } else {
     if (argstr(0, raw_syscalls_names, MAX_ARG_LEN) < 0) return -1;
     myproc()->trace_mask = get_syscalls_mask(raw_syscalls_names);
@@ -117,5 +117,5 @@ sys_etrace(void)
 
   //printf("Mask: %ld", myproc()->trace_mask);
   if (myproc()->trace_mask & 0x1) return -1;
-  return 0;//get_syscalls_mask((char*)p);
+  return 0;
 }

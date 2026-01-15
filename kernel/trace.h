@@ -1,6 +1,8 @@
 #ifndef _TRACE_H_
 #define _TRACE_H_
 
+#define TRACE_ALL_MSK 0xfffffffffffffffeUL
+
 typedef enum {
     ___NONE_TYPE = 0, 
     INT_32_TYPE  = 1, 

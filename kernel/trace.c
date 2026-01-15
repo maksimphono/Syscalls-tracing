@@ -9,28 +9,28 @@
 #include "trace.h"
 
 Syscall_arg_type Syscall_arg_types_LUT[][SYS_MAXARG] = {
-[SYS_fork]    { ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE  },
-[SYS_exit]    { INT_32_TYPE  , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE  },
-[SYS_wait]    { ADDRESS_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE  },
-[SYS_pipe]    { ADDRESS_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE  },
-[SYS_read]    { INT_32_TYPE  , ADDRESS_TYPE , INT_32_TYPE  , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE  },
-[SYS_kill]    { INT_32_TYPE  , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE  },
-[SYS_exec]    { STRING_TYPE  , ADDRESS_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE  },
-[SYS_fstat]   { INT_32_TYPE  , ADDRESS_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE  },
-[SYS_chdir]   { STRING_TYPE  , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE  },
-[SYS_dup]     { INT_32_TYPE  , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE  },
-[SYS_getpid]  { ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE  },
-[SYS_sbrk]    { INT_32_TYPE  , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE  },
-[SYS_sleep]   { INT_32_TYPE  , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE  },
-[SYS_uptime]  { ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE  },
-[SYS_open]    { STRING_TYPE  , INT_32_TYPE  , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE  },
-[SYS_write]   { INT_32_TYPE  , ADDRESS_TYPE , INT_32_TYPE  , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE  },
-[SYS_mknod]   { STRING_TYPE  , INT_16_TYPE  , INT_16_TYPE  , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE  },
-[SYS_unlink]  { STRING_TYPE  , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE  },
-[SYS_link]    { STRING_TYPE  , STRING_TYPE  , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE  },
-[SYS_mkdir]   { STRING_TYPE  , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE  },
-[SYS_close]   { INT_32_TYPE  , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE  },
-[SYS_etrace]  { STRING_TYPE  , INT_32_TYPE  , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE  }
+[SYS_fork]      { ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE    },
+[SYS_exit]      { INT_32_TYPE  , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE    },
+[SYS_wait]      { ADDRESS_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE    },
+[SYS_pipe]      { ADDRESS_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE    },
+[SYS_read]      { INT_32_TYPE  , ADDRESS_TYPE , INT_32_TYPE  , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE    },
+[SYS_kill]      { INT_32_TYPE  , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE    },
+[SYS_exec]      { STRING_TYPE  , ADDRESS_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE    },
+[SYS_fstat]     { INT_32_TYPE  , ADDRESS_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE    },
+[SYS_chdir]     { STRING_TYPE  , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE    },
+[SYS_dup]       { INT_32_TYPE  , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE    },
+[SYS_getpid]    { ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE    },
+[SYS_sbrk]      { INT_32_TYPE  , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE    },
+[SYS_sleep]     { INT_32_TYPE  , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE    },
+[SYS_uptime]    { ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE    },
+[SYS_open]      { STRING_TYPE  , INT_32_TYPE  , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE    },
+[SYS_write]     { INT_32_TYPE  , ADDRESS_TYPE , INT_32_TYPE  , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE    },
+[SYS_mknod]     { STRING_TYPE  , INT_16_TYPE  , INT_16_TYPE  , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE    },
+[SYS_unlink]    { STRING_TYPE  , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE    },
+[SYS_link]      { STRING_TYPE  , STRING_TYPE  , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE    },
+[SYS_mkdir]     { STRING_TYPE  , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE    },
+[SYS_close]     { INT_32_TYPE  , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE    },
+[SYS_etrace]    { STRING_TYPE  , INT_32_TYPE  , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE , ___NONE_TYPE    }
 };
 
 const char* Syscalls_names[NSYSCALLS] = {
@@ -94,12 +94,12 @@ uint8 collect_syscall_arguments(char str_arguments[SYS_MAXARG][MAX_ARG_LEN], int
             //len -= 1;
             sprintf(str_arguments[i], MAX_STR_P + 2, (char*)(syscall_args_print_formats[types[i]]), buffer);
             if (len > MAX_STR_P) {
-              sprintf(&str_arguments[i][MAX_STR_P + 1], 4, "\"...");
+                sprintf(&str_arguments[i][MAX_STR_P + 1], 4, "\"...");
             }
             break;
         }
         default:
-          continue;
+            continue;
         }
     }
 
@@ -107,47 +107,47 @@ uint8 collect_syscall_arguments(char str_arguments[SYS_MAXARG][MAX_ARG_LEN], int
 }
 
 void print_traced_syscall(int pid, int syscall_num, char syscall_arguments[SYS_MAXARG][MAX_ARG_LEN], uint8 arguments_len, uint64 ret) {
-  printf("%d: syscall %s(", pid, get_syscall_name(syscall_num));
-  if (arguments_len > 0) {
-    for (uint8 i = 0; i < arguments_len - 1; i++) {
-      printf("%s, ", syscall_arguments[i]);
+    printf("%d: syscall %s(", pid, get_syscall_name(syscall_num));
+    if (arguments_len > 0) {
+        for (uint8 i = 0; i < arguments_len - 1; i++) {
+            printf("%s, ", syscall_arguments[i]);
+        }
+        printf("%s", syscall_arguments[arguments_len - 1]);
     }
-    printf("%s", syscall_arguments[arguments_len - 1]);
-  }
-  printf(")");
-  if (syscall_num == SYS_exit)
-    printf(" -> ?\n");
-  else
-    printf(" -> %ld\n", (long)ret);
+    printf(")");
+    if (syscall_num == SYS_exit)
+        printf(" -> ?\n");
+    else
+        printf(" -> %ld\n", (long)ret);
 }
 
 int get_syscall_num(char* name, uint64 len) {
-  for (int i = 1; i < NSYSCALLS + 1; i++) {
-    if (len == strlen(Syscalls_names[i]) && strncmp(Syscalls_names[i], name, len) == 0) {
-      //printf("%s, %d\n", syscalls_names[i], i);
-      return i;
+    for (int i = 1; i < NSYSCALLS; i++) {
+        if (len == strlen(Syscalls_names[i]) && strncmp(Syscalls_names[i], name, len) == 0) {
+            //printf("%s, %d\n", syscalls_names[i], i);
+            return i;
+        }
     }
-  }
-  return 0;
+    return 0;
 }
 
 uint64 get_syscalls_mask(char* raw_syscalls_names) {
-  uint64 mask = 0x0;
-  int start = 0, end = 0;
-  int num = 0;
+    uint64 mask = 0x0;
+    int start = 0, end = 0;
+    int num = 0;
 
-  while (1) {
-    if (raw_syscalls_names[end] == ',' || raw_syscalls_names[end] == '\0') {
-      //printf("%s", &raw_syscalls_names[start]);
-      num = get_syscall_num(&raw_syscalls_names[start], end - start);
-      if (num != 0) {
-        mask |= 1L << num;
-      }
-      start = end + 1;
-      if (raw_syscalls_names[end] == '\0') break;
-    }
-    end += 1;
-  } 
+    while (1) {
+        if (raw_syscalls_names[end] == ',' || raw_syscalls_names[end] == '\0') {
+            //printf("%s", &raw_syscalls_names[start]);
+            num = get_syscall_num(&raw_syscalls_names[start], end - start);
+            if (num != 0) {
+                mask |= 1L << num;
+            }
+            start = end + 1;
+            if (raw_syscalls_names[end] == '\0') break;
+        }
+        end += 1;
+    } 
 
-  return mask;
+    return mask;
 }
