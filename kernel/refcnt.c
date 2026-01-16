@@ -1,4 +1,17 @@
+#include "types.h"
+#include "memlayout.h"
+#include "riscv.h"
 #include "refcnt.h"
+
+refcnt_t refcnt;
+
+// Function to initialize the reference counter
+void refcnt_init() {
+    for (int i = 0; i < (PGROUNDUP(PHYSTOP) - KERNBASE)/PGSIZE; i++) {
+        refcnt.count[i] = 0;  // Initialize the reference count to 0 for all pages
+    }
+    initlock(&refcnt.lock, "refcnt");  // Initialize the spinlock
+}
 
 uint64 page_index(uint64 pa){
     return ((PGROUNDUP(pa) - KERNBASE)/PGSIZE);
