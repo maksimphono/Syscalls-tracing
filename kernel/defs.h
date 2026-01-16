@@ -191,4 +191,17 @@ void            virtio_disk_intr(void);
 // number of elements in fixed-size array
 #define NELEM(x) (sizeof(x)/sizeof((x)[0]))
 
-// Tracing:
+// COW:
+
+typedef unsigned char byte;
+
+// COW flag will be on 8th place
+#define COW_flag(pte) ((pte >> 8) & 1ULL)
+
+#define COW_unset(pte) (pte & ~(1ULL << 8))
+
+#define COW_set(pte) (pte | (1ULL << 8))
+
+#define W_unset(pte) (pte & ~(1ULL << 2))
+
+#define W_set(pte) (pte | (1ULL << 2))

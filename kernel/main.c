@@ -3,6 +3,7 @@
 #include "memlayout.h"
 #include "riscv.h"
 #include "defs.h"
+#include "refcnt.h"
 
 volatile static int started = 0;
 
@@ -11,6 +12,7 @@ void
 main()
 {
   if(cpuid() == 0){
+    refcnt_init();
     consoleinit();
     printfinit();
     printf("\n");

@@ -5,6 +5,7 @@
 #include "riscv.h"
 #include "defs.h"
 #include "fs.h"
+#include "refcnt.h"
 
 /*
  * the kernel's page table.
@@ -314,27 +315,32 @@ uvmcopy(pagetable_t old, pagetable_t new, uint64 sz)
 {
   pte_t *pte;
   uint64 pa, i;
-  uint flags;
-  char *mem;
+  uint64 flags;
 
   for(i = 0; i < sz; i += PGSIZE){
     if((pte = walk(old, i, 0)) == 0)
       panic("uvmcopy: pte should exist");
     if((*pte & PTE_V) == 0)
       panic("uvmcopy: page not present");
+
+    // convert parent PTE to COW
+    *pte = COW_set(W_unset(*pte));
+
+    // extract physical address and flags, prepare to map new PTE to that page
     pa = PTE2PA(*pte);
     flags = PTE_FLAGS(*pte);
-    if((mem = kalloc()) == 0)
-      goto err;
-    memmove(mem, (char*)pa, PGSIZE);
-    if(mappages(new, i, PGSIZE, (uint64)mem, flags) != 0){
-      kfree(mem);
+
+    if (mappages(new, i, PGSIZE, pa, flags) != 0){
       goto err;
     }
+
+    // increase refcount
+    uint32 idx = page_index(pa);
+    inc_ref(idx);
   }
   return 0;
 
- err:
+err:
   uvmunmap(new, 0, i / PGSIZE, 1);
   return -1;
 }
@@ -369,7 +375,41 @@ copyout(pagetable_t pagetable, uint64 dstva, char *src, uint64 len)
     if(pte == 0 || (*pte & PTE_V) == 0 || (*pte & PTE_U) == 0 ||
        (*pte & PTE_W) == 0)
       return -1;
-    pa0 = PTE2PA(*pte);
+
+    if (COW_flag(*pte)) {
+      // this page is shared via COW, I need to create copy of the page first
+      uint64 pa = PTE2PA(*pte);
+      uint64 page_idx = page_index(pa);
+      uint64 flags = PTE_FLAGS(*pte);
+      byte* mem;
+
+      if (refcnt.count[page_idx] > 1) { // if many processes use this page, I need to copy it
+        // allocate new page and copy content to it
+        if((mem = kalloc()) == 0)// panic("panic");
+          uvmunmap(pagetable, 0, va0 / PGSIZE, 1);
+
+        memmove(mem, (byte*)pa, PGSIZE);
+
+        *pte = *pte & ~1ULL; // unset VALID bit (make invalid for map)
+        if (mappages(pagetable, va0, PGSIZE, (uint64)mem, flags) != 0){
+          kfree(mem);
+          uvmunmap(pagetable, 0, va0 / PGSIZE, 1);
+        }
+
+        // reset the flags on the new PTE
+        pte = walk(pagetable, va0, 0);
+        *pte = COW_unset(W_set(*pte));
+
+        // update reference counter
+        dec_ref(page_idx);
+      } else {
+        // there is only one process that uses that page, no need to copy, just reset the flags
+        *pte = COW_unset(W_set(*pte));
+      }
+    }
+
+    pa0 = walkaddr(pagetable, va0);
+
     n = PGSIZE - (dstva - va0);
     if(n > len)
       n = len;

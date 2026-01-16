@@ -5,6 +5,7 @@
 #include "spinlock.h"
 #include "proc.h"
 #include "defs.h"
+#include "refcnt.h"
 
 struct spinlock tickslock;
 uint ticks;
@@ -65,6 +66,46 @@ usertrap(void)
     intr_on();
 
     syscall();
+  } else if (r_scause() == 15) {
+    uint64 fault_page_va = r_stval() & ~0xfffULL; // convert to page's base address immediately
+    pte_t* fault_pte = walk(p->pagetable, fault_page_va, 0);
+
+    if (COW_flag(*fault_pte)) { // it is really a COW interruption
+      uint64 pa = PTE2PA(*fault_pte);
+      uint64 page_idx = page_index(pa);
+      uint64 flags = PTE_FLAGS(*fault_pte);
+      byte* mem;
+
+      if (refcnt.count[page_idx] > 1) { // if many processes use this page, I need to copy it
+        // allocate new page and copy content to it
+        if((mem = kalloc()) == 0)// panic("panic");
+          uvmunmap(p->pagetable, 0, fault_page_va / PGSIZE, 1);
+
+        memmove(mem, (byte*)pa, PGSIZE);
+
+        *fault_pte = *fault_pte & ~1ULL; // unset VALID bit (make invalid for map)
+        if(mappages(p->pagetable, fault_page_va, PGSIZE, (uint64)mem, flags) != 0){
+          kfree(mem);
+          uvmunmap(p->pagetable, 0, fault_page_va / PGSIZE, 1);
+        }
+
+        // reset the flags on the new PTE
+        fault_pte = walk(p->pagetable, fault_page_va, 0);
+        *fault_pte = COW_unset(W_set(*fault_pte));
+
+        // update reference counter
+        dec_ref(page_idx);
+
+      } else {
+        // this is the last process that uses that page, no need to copy, just reset the flags
+        *fault_pte = COW_unset(W_set(*fault_pte));
+      }
+      p->trapframe->epc = r_sepc(); // repeat the failed instaruction
+
+    } else { // it isn't COW interruption, just regular read-only permission violation
+      // kill the process
+      setkilled(p);
+    }
   } else if((which_dev = devintr()) != 0){
     // ok
   } else {
