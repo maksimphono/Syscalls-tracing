@@ -13,9 +13,11 @@ extern refcnt_t refcnt;
 
 void refcnt_init();
 uint64 page_index(uint64 pa);
-void inc_ref(uint64 page_idx);
-void dec_ref(uint64 page_idx);
+int inc_ref(uint64 page_idx);
+int dec_ref(uint64 page_idx);
 
 void set_ref(uint64 page_idx, int value);
+
+int get_ref(uint64 page_idx);
 
 #endif // REFCNT_H

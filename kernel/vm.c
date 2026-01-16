@@ -321,19 +321,20 @@ uvmcopy(pagetable_t old, pagetable_t new, uint64 sz)
     if((pte = walk(old, i, 0)) == 0)
       panic("uvmcopy: pte should exist");
     if((*pte & PTE_V) == 0)
-      panic("uvmcopy: page not present");
+      continue;
+      //panic("uvmcopy: page not present");
 
     // convert parent PTE to COW
-    *pte = COW_set(W_unset(*pte));
+    if (PTE_W & *pte) {
+      *pte = COW_set(W_unset(*pte));
+    }
 
     // extract physical address and flags, prepare to map new PTE to that page
     pa = PTE2PA(*pte);
     flags = PTE_FLAGS(*pte);
-
     if (mappages(new, i, PGSIZE, pa, flags) != 0){
       goto err;
     }
-
     // increase refcount
     uint32 idx = page_index(pa);
     inc_ref(idx);
@@ -373,7 +374,7 @@ copyout(pagetable_t pagetable, uint64 dstva, char *src, uint64 len)
       return -1;
     pte = walk(pagetable, va0, 0);
     if(pte == 0 || (*pte & PTE_V) == 0 || (*pte & PTE_U) == 0 ||
-       (*pte & PTE_W) == 0)
+       ((*pte & PTE_W) == 0 && !COW_flag(*pte)))
       return -1;
 
     if (COW_flag(*pte)) {
@@ -383,22 +384,15 @@ copyout(pagetable_t pagetable, uint64 dstva, char *src, uint64 len)
       uint64 flags = PTE_FLAGS(*pte);
       byte* mem;
 
-      if (refcnt.count[page_idx] > 1) { // if many processes use this page, I need to copy it
+      if (get_ref(page_idx) > 1) { // if many processes use this page, I need to copy it
         // allocate new page and copy content to it
         if((mem = kalloc()) == 0)// panic("panic");
-          uvmunmap(pagetable, 0, va0 / PGSIZE, 1);
+          return -1;
 
-        memmove(mem, (byte*)pa, PGSIZE);
+        memmove(mem, (void*)pa, PGSIZE);
 
-        *pte = *pte & ~1ULL; // unset VALID bit (make invalid for map)
-        if (mappages(pagetable, va0, PGSIZE, (uint64)mem, flags) != 0){
-          kfree(mem);
-          uvmunmap(pagetable, 0, va0 / PGSIZE, 1);
-        }
-
-        // reset the flags on the new PTE
-        pte = walk(pagetable, va0, 0);
-        *pte = COW_unset(W_set(*pte));
+        //*pte = PA2PTE((uint64)mem) | flags;
+        *pte = PA2PTE((uint64)mem) | COW_unset(W_set(flags));
 
         // update reference counter
         dec_ref(page_idx);
@@ -408,7 +402,8 @@ copyout(pagetable_t pagetable, uint64 dstva, char *src, uint64 len)
       }
     }
 
-    pa0 = walkaddr(pagetable, va0);
+    sfence_vma();
+    pa0 = PTE2PA(*pte);
 
     n = PGSIZE - (dstva - va0);
     if(n > len)
