@@ -76,22 +76,14 @@ usertrap(void)
       uint64 flags = PTE_FLAGS(*fault_pte);
       byte* mem;
 
-      if (refcnt.count[page_idx] > 1) { // if many processes use this page, I need to copy it
+      if (get_ref(page_idx) > 1) { // if many processes use this page, I need to copy it
         // allocate new page and copy content to it
         if((mem = kalloc()) == 0)// panic("panic");
-          uvmunmap(p->pagetable, 0, fault_page_va / PGSIZE, 1);
+          setkilled(p);
 
-        memmove(mem, (byte*)pa, PGSIZE);
+        memmove(mem, (void*)pa, PGSIZE);
 
-        *fault_pte = *fault_pte & ~1ULL; // unset VALID bit (make invalid for map)
-        if(mappages(p->pagetable, fault_page_va, PGSIZE, (uint64)mem, flags) != 0){
-          kfree(mem);
-          uvmunmap(p->pagetable, 0, fault_page_va / PGSIZE, 1);
-        }
-
-        // reset the flags on the new PTE
-        fault_pte = walk(p->pagetable, fault_page_va, 0);
-        *fault_pte = COW_unset(W_set(*fault_pte));
+        *fault_pte = PA2PTE((uint64)mem) | COW_unset(W_set(flags));
 
         // update reference counter
         dec_ref(page_idx);
@@ -100,7 +92,7 @@ usertrap(void)
         // this is the last process that uses that page, no need to copy, just reset the flags
         *fault_pte = COW_unset(W_set(*fault_pte));
       }
-      p->trapframe->epc = r_sepc(); // repeat the failed instaruction
+      sfence_vma(); // flush translation lookaside buffer
 
     } else { // it isn't COW interruption, just regular read-only permission violation
       // kill the process

@@ -58,8 +58,9 @@ kfree(void *pa)
     panic("kfree");
 
   uint64 page_idx = page_index((uint64)pa);
+  int current_cnt = dec_ref(page_idx);
 
-  if (refcnt.count[page_idx] <= 1) {
+  if (current_cnt <= 0) {
     // last process, that was using this page gave it up -> free it completely
 
     // Fill with junk to catch dangling refs.
@@ -76,7 +77,7 @@ kfree(void *pa)
 
   } else {
     // there are still some processes, that are using that page -> don't free it yet
-    dec_ref(page_idx);
+    // dec_ref(page_idx);
   }
 }
 
